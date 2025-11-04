@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from routers import todos
 
 app = FastAPI()
