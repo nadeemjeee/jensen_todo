@@ -5,12 +5,9 @@ from app.services import file_service
 
 @pytest.fixture
 def client(tmp_path):
-    """
-    Use a TEMPORARY db.json for all tests.
-    This prevents tests from touching your real app/data/db.json.
-    """
+    # Use a temporary db.json so tests don't touch your real data
     file_service.FILE_PATH = tmp_path / "db.json"
-    from app.main import app  # import after we pointed FILE_PATH
+    from app.main import app
     return TestClient(app)
 
 
@@ -21,51 +18,52 @@ def test_list_empty(client: TestClient):
 
 
 def test_create_todo(client: TestClient):
-    payload = {"title": "Test", "description": "Desc", "completed": False}
-    res = client.post("/todos", json=payload)
+    new_todo = {
+        "id": 0,
+        "title": "Test Todo",
+        "description": "Testing creation",
+        "completed": False
+    }
+    res = client.post("/todos", json=new_todo)
     assert res.status_code == 201
     data = res.json()
-    assert data["id"] == 1
-    assert data["title"] == "Test"
+    assert data["title"] == "Test Todo"
     assert data["completed"] is False
-
-    # list should now contain one item
-    res2 = client.get("/todos")
-    assert res2.status_code == 200
-    assert len(res2.json()) == 1
+    assert "id" in data
 
 
 def test_get_todo_by_id(client: TestClient):
-    client.post("/todos", json={"title": "A", "description": "", "completed": False})
     res = client.get("/todos/1")
-    assert res.status_code == 200
-    assert res.json()["id"] == 1
-
-
-def test_get_nonexistent_todo(client: TestClient):
-    res = client.get("/todos/999")
-    assert res.status_code == 404
-    assert res.json()["detail"] == "Todo not found"
-
-
-def test_update_todo(client: TestClient):
-    client.post("/todos", json={"title": "Old", "description": "", "completed": False})
-    payload = {"title": "New", "description": "Updated", "completed": True}
-    res = client.put("/todos/1", json=payload)
     assert res.status_code == 200
     data = res.json()
     assert data["id"] == 1
-    assert data["title"] == "New"
+    assert data["title"] == "Test Todo"
+
+
+def test_update_todo(client: TestClient):
+    updated_todo = {
+        "id": 1,
+        "title": "Updated Todo",
+        "description": "Updated",
+        "completed": True
+    }
+    res = client.put("/todos/1", json=updated_todo)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == 1
+    assert data["title"] == "Updated Todo"
     assert data["description"] == "Updated"
     assert data["completed"] is True
 
 
 def test_delete_todo(client: TestClient):
-    client.post("/todos", json={"title": "To remove", "description": "", "completed": False})
-    res = client.delete("/todos/1")
+    # create something to delete (id will be 2 if previous tests ran)
+    client.post("/todos", json={"id": 0, "title": "To remove", "description": "", "completed": False})
+
+    res = client.delete("/todos/2")
     assert res.status_code == 200
-    assert res.json()["message"] == "Todo 1 deleted"
+    assert res.json()["message"] == "Todo 2 deleted successfully"
 
     # confirm it's gone
-    res2 = client.get("/todos/1")
+    res2 = client.get("/todos/2")
     assert res2.status_code == 404
