@@ -1,6 +1,8 @@
-from fastapi import APIRouter
-from schemas.todo import Todo
-from services.file_service import read_db, write_db
+from fastapi import APIRouter, HTTPException, status
+from typing import List
+from app.schemas.todo import Todo  # or Todo, TodoCreate, TodoUpdate if you have them
+from app.services.file_service import read_db, write_db
+
 from datetime import datetime, timezone
 
 router = APIRouter()
