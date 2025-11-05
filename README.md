@@ -52,7 +52,7 @@ Kontrollera att allt fungerar genom att köra servern:
 uvicorn app.main:app --reload
 ```
 
-Öppna din webbläsare och gå till `http://localhost:8000`. Du bör se ett meddelande som säger "Hello, World!".
+Öppna din webbläsare och gå till `http://localhost:8001`. Du bör se ett meddelande som säger "Hello, World!".
 
 Du kan också se API-dokumentationen på:
 - `http://localhost:8000/docs` (Swagger UI)
